@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<launch>
+  <master auto="start"/>
+     <!--robot_localization: navsat for robot odometry -->
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_pose" respawn="true" output="screen">
+      <param name="yaw_offset" value="0"/>
+      <param name="wait_for_darum" value="false" />
+      <param name="magnetic_declination_radians" value="0.1324705"/>
+      <param name="zero_altitude" value="true"/>
+      <param name="publish_filtered_gps" value="true"/>
+      <param name="roll_offset" value="0.02"/>
+      <param name="pitch_offset" value="0.02"/>
+      <param name="broadcast_utm_transform" value="true"/>
+      <remap from="/imu/data" to="imu" />
+      <remap from="/gps/fix" to="fix" />   
+  </node>
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local" respawn="true" output="screen">
+      <param name="publish_tf" value="true"/>
+      <param name="map_frame" value="map"/>
+      <param name="odom_frame" value="odom"/>
+      <param name="base_link_frame" value="base_link"/>
+      <param name="world_frame" value="odom"/>
+      <param name="imu0" value="imu"/>
+      <param name="imu0_remove_gravitational_acceleration" value="true"/>
+      <param name="odom0" value="odometry/gps"/>
+      <!--<rosparam param="odom0_config">[false, false, false,
+                                      false, false, false, 
+                                      true, false, false, 
+                                      false, false, false,
+                                      false, false, false]</rosparam> -->
+      <rosparam param="imu0_config">[false, false, false,
+                                     false, false, false,
+                                     false, false, false,
+                                     false, false, true,
+                                     false, false, false]</rosparam>
+      <rosparam param="odom0_config">[true, true, false,
+                                      false, false, false,
+                                      false, false, false,
+                                      false, false, false,
+                                      false, false, false]</rosparam>
+      <param name="two_d_mode" value="true"/>
+      <param name="odom0_differential" value="false"/>
+      <param name="imu0_differential" value="false"/>
+      <remap from="/odometry/filtered" to="/odometry/filtered_local"/>
+  </node>
+  <!--    Second instance of robot_localization, GPS integrated localization -->
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_gps" respawn="true" output="screen">
+      <param name="publish_tf" value="true"/>
+      <param name="map_frame" value="map"/>
+      <param name="odom_frame" value="odom"/>
+      <param name="base_link_frame" value="base_link"/>
+      <param name="world_frame" value="map"/>
+      <param name="imu0" value="imu"/>
+      <param name="odom0" value="odometry/gps"/>
+      <param name="imu0_remove_gravitational_acceleration" value="true"/>
+      <!--<rosparam param="odom0_config">[false, false, false,
+                                      false, false, false, 
+                                      true, false, false, 
+                                      false, false, false,
+                                      false, false, false]</rosparam> -->
+      <rosparam param="imu0_config">[false, false, false,
+                                     false, false, false,
+                                     false, false, false,
+                                     false, false, true,
+                                     false, false, false]</rosparam>
+      <rosparam param="odom0_config">[true, true, false,
+                                      false, false, false,
+                                      false, false, false,
+                                      false, false, false,
+                                      false, false, false]</rosparam>
+      <param name="two_d_mode" value="true"/>
+      <!--<param name="odom0_differential" value="false"/> -->
+      <param name="imu0_differential" value="false"/>
+      <param name="odom0_differential" value="false"/>    
+  </node>
+</launch>
+

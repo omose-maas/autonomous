@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="map_path" value="/home/omose/Documents/MaaS/map/map.yaml"/>
+
+  <!-- tf setup -->
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_imu" 
+    args="0 0 0 0 0 0 /base_link /base_imu_link 100"/> 
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_gps" 
+    args="0 0 0 0 0 0 /base_link /gps 100"/> 
+
+  <include file="$(find razor_imu_9dof)/launch/razor-pub.launch"/> 
+
+  <!-- reach kit setup -->
+  <include file="$(find reachkit_driver)/launch/reach_nmea_navsatfix.launch" />
+
+  
+  <!-- map setup -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+    <param name="frame_id" value="/map"/>
+  </node>
+
+  <!-- robot_localization setup -->
+  <include file="$(find driverless_core)/launch/includes/thinkpad_localiz.launch" />
+
+  <!-- move_base -->
+  <include file="$(find driverless_core)/launch/includes/teb_planner.launch" />
+
+</launch>
